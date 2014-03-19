@@ -142,6 +142,9 @@ type
       procedure AddRule(const ARule: TWindowsFirewallRule);
       /// <remarks>The TWindowsFirewallRule created by this method must be freed manually.</remarks>
       function CreateRule: TWindowsFirewallRule;
+      /// <param name="AName">Name of rule to find</param>
+      /// <remarks>Returns True/False depending on if rule is found</remarks>
+      function FindRule(const AName: string): Boolean;
       destructor Destroy; override;
       function GetEnumerator: TFirewallRuleEnumerator;
       procedure RemoveRule(const AName: string);
@@ -164,6 +167,8 @@ type
     class function CreateAllowingRule: INetFwRule;
     class function CreateBlockingRule: INetFwRule;
     class function CreatePolicy: INetFwPolicy2;
+    /// <summary>Allows access to a firewall rule given its name.</summary>
+    /// <remarks>Rules returned from here are tracked, and will be freed automatically.</remarks>
     class property Rules: TWindowsFirewallRules read getWindowsFirewallRules;
     /// <summary>Check if the firewall is enabled or not.</summary>
     /// <remarks>Returns if the firewall is enabled.</remarks>
@@ -627,12 +632,28 @@ begin
 end;
 
 procedure TWindowsFirewall.TWindowsFirewallRules.EnsureRulesExist;
+var
+  LClassID: string;
+  LGUID: TGUID;
 begin
   if not Assigned(FPolicy) then
     begin
-      FPolicy := CreateComObject(ProgIDToClassID('HNetCfg.FwPolicy2')) as INetFwPolicy2;
+      LGUID := ProgIDToClassID('HNetCfg.FwPolicy2');
+      LClassID := LGUID.ToString;
+      FPolicy := CreateComObject(LGUID) as INetFwPolicy2;
       FRules := FPolicy.Rules;
     end;
+end;
+
+function TWindowsFirewall.TWindowsFirewallRules.FindRule(const AName: string): Boolean;
+begin
+  EnsureRulesExist;
+  try
+    Result := Assigned(FRules.Item(AName));
+  except
+    on E: EOleException do
+      Result := False;
+  end;
 end;
 
 function TWindowsFirewall.TWindowsFirewallRules.getCount: Integer;
@@ -649,10 +670,13 @@ end;
 
 function TWindowsFirewall.TWindowsFirewallRules.getRule(
   const AName: string): TWindowsFirewallRule;
+var
+  LRule: INetFwRule;
 begin
-  Result := TWindowsFirewall.TWindowsFirewallRule.CreateEmptyRule;
   EnsureRulesExist;
-  Result.FRule := FRules.Item(AName);
+  LRule := FRules.Item(AName);
+  Result := TWindowsFirewall.TWindowsFirewallRule.CreateEmptyRule;
+  Result.FRule := LRule;
 end;
 
 procedure TWindowsFirewall.TWindowsFirewallRules.RemoveRule(

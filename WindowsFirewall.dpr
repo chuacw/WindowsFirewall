@@ -268,38 +268,37 @@ begin
   CreateNewBlockingRule;
 end;
 
+procedure ShowRule(const ARule: TWindowsFirewall.TWindowsFirewallRule);
+begin
+  WriteLn('Name: ', ARule.Name);
+  WriteLn('Action: ', ARule.Action.ToString);
+  WriteLn('Description: ', ARule.Description);
+  WriteLn('Direction: ', ARule.Direction.ToString);
+  WriteLn('Enabled: ', ARule.Enabled);
+  WriteLn('Profile: ', ARule.Profile.ToString);
+  WriteLn('Interface Types: ', ARule.InterfaceTypes.ToString);
+  WriteLn('-----------------------------------');
+end;
+
 procedure EnumRules;
 var
   LFirewall: TWindowsFirewall;
   LRule: TWindowsFirewall.TWindowsFirewallRule;
-  LInterface: string;
+  LRuleName, LInterface: string;
 begin
-  ReportMemoryLeaksOnShutdown := True;
   LFirewall := TWindowsFirewall.Create;
   try
-    LRule := LFirewall.Rules['Test rule using TWindowsFirewall'];
-    WriteLn('Name: ', LRule.Name);
-    WriteLn('Action: ', LRule.Action.ToString);
-    WriteLn('Description: ', LRule.Description);
-    WriteLn('Direction: ', LRule.Direction.ToString);
-    WriteLn('Enabled: ', LRule.Enabled);
-    WriteLn('Profile: ', LRule.Profile.ToString);
-    WriteLn('-----------------------------------');
-    LRule.Free;
+    for LRuleName in TArray<string>.Create('Doesn''t exist', 'Test rule using TWindowsFirewall') do
+      if LFirewall.Rules.FindRule(LRuleName) then
+        begin
+          LRule := LFirewall.Rules[LRuleName];
+          ShowRule(LRule);
+          LRule.Free;
+        end;
 
     for LRule in LFirewall.Rules do
-      begin
-        WriteLn('Name: ', LRule.Name);
-        WriteLn('Action: ', LRule.Action.ToString);
-        WriteLn('Description: ', LRule.Description);
-        WriteLn('Direction: ', LRule.Direction.ToString);
-        WriteLn('Enabled: ', LRule.Enabled);
-        WriteLn('Profile: ', LRule.Profile.ToString);
-        WriteLn('Interface Types: ', LRule.InterfaceTypes.ToString);
-        for LInterface in LRule.Interfaces do
-          WriteLn('Interface: ', LInterface);
-        WriteLn('-----------------------------------');
-      end;
+      ShowRule(LRule);
+
   finally
     LFirewall.Free;
   end;
