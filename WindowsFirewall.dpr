@@ -11,7 +11,7 @@
 program WindowsFirewall;
 
 {$APPTYPE CONSOLE}
-
+{$WEAKLINKRTTI OFF}
 {$R *.res}
 
 uses
@@ -253,8 +253,8 @@ begin
     LRule := LFirewall.Rules.CreateRule;
     LRule.Profile := [ALL];
     LRule.Action := Block;
-    LRule.Name := 'Test rule using TWindowsFirewall';
-    LRule.Description := 'Test description';
+    LRule.Name := 'Block IPs which sends SPAM via SMTP';
+    LRule.Description := 'Blocks IPs which tries to send spam via SMTP';
     LRule.AddIPs(LBlockIPs);
     LRule.Enabled := True;
     LFirewall.Rules.AddRule(LRule);

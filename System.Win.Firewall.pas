@@ -8,6 +8,7 @@
 {                                                       }
 {*******************************************************}
 {$WARN GARBAGE OFF}
+{$WEAKLINKRTTI OFF}
 unit System.Win.Firewall;
 
 interface
@@ -22,6 +23,7 @@ type
       FRule: INetFwRule;
       constructor CreateEmptyRule;
     public type
+      TWindowsFirewallToStringHelper<T> = record helper for T end;
       TWindowsFirewallRuleAction = (Block, Allow);
       TWindowsFirewallRuleActionHelper = record helper for TWindowsFirewallRuleAction
         function ToString: string;
@@ -89,14 +91,22 @@ type
       procedure setServiceName(const Value: string);
     public
       constructor Create;
+      ///<summary>Adds an IPv4 address to the list of IPv4 addresses to block.</summary>
       procedure AddIP(const IP: string);
+      ///<summary>Adds a list of IPv4 addresses to the list of IPv4 addresses to block.</summary>
       procedure AddIPs(const SL: TStringList); overload;
+      ///<summary>Adds a list of IPv4 addresses to the list of IPv4 addresses to block.</summary>
+      ///<param name="IPs">List of IPs to block.</param>
       procedure AddIPs(const IPs: TArray<string>); overload;
       destructor Destroy; override;
+      ///<summary>Specifies whether to block or allow connections.</summary>
       property Action: TWindowsFirewallRuleAction read getAction write setAction;
+      ///<summary>Specifies the application to which this rule applies.</summary>
       property ApplicationName: string read getApplicationName write setApplicationName;
       property EdgeTraversal: Boolean read getEdgeTraversal write setEdgeTraversal;
+      ///<summary>Specifies if this rule is enabled or disabled.</summary>
       property Enabled: Boolean read getEnabled write setEnabled;
+      ///<summary>Specifies what this rule do.</summary>
       property Description: string read getDescription write setDescription;
       property Direction: TWindowsFirewallRuleDirection read getDirection write setDirection;
       property Grouping: string read getGrouping write setGrouping;
@@ -105,9 +115,12 @@ type
       property InterfaceTypes: TWindowsFirewallRuleInterfaceTypes read getInterfaceTypes write setInterfaceTypes;
       property LocalAddresses: string read getLocalAddresses write setLocalAddresses;
       property LocalPorts: string read getLocalPorts write setLocalPorts;
+      ///<summary>Specifies name of this rule.</summary>
       property Name: string read getName write setName;
+      ///<summary>Specifies which profiles to apply this rule to.</summary>
       property Profile: TWindowsFirewallProfiles read getProfile write setProfile;
       property Protocol: TWindowsFirewallRuleProtocol read getProtocol write setProtocol;
+      ///<summary>Specifies the remote addresses which this rule applies to.</summary>
       property RemoteAddresses: string read getRemoteAddresses write setRemoteAddresses;
       property RemotePorts: string read getRemotePorts write setRemotePorts;
       property ServiceName: string read getServiceName write setServiceName;
@@ -116,6 +129,7 @@ type
     TWindowsFirewallRules = class
     protected
       FPolicy: INetFwPolicy2;
+      ///<remarks>Call EnsureRulesExist before accessing FRules.</remarks>
       FRules: INetFwRules;
       FRuleList: TObjectList<TWindowsFirewallRule>;
       procedure EnsureRulesExist;
@@ -143,12 +157,17 @@ type
       /// <remarks>The TWindowsFirewallRule created by this method must be freed manually.</remarks>
       function CreateRule: TWindowsFirewallRule;
       /// <param name="AName">Name of rule to find</param>
-      /// <remarks>Returns True/False depending on if rule is found</remarks>
+      /// <remarks>Returns True/False depending on if rule is found.</remarks>
       function FindRule(const AName: string): Boolean;
       destructor Destroy; override;
       function GetEnumerator: TFirewallRuleEnumerator;
+      ///<param name="AName">Name of rule to remove.</param>
+      ///<summary>Removes a rule by its name.</summary>
       procedure RemoveRule(const AName: string);
+      ///<remarks>Returns number of rules</remarks>
       property Count: Integer read getCount;
+      ///<summary>Gets a rule given its name.</summary>
+      ///<remarks>raises an exception if rule doesn't exist.</remarks>
       property Rules[const AName: string]: TWindowsFirewallRule read getRule; default;
     end;
   protected

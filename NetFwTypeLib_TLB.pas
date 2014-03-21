@@ -1,5 +1,5 @@
 unit NetFwTypeLib_TLB;
-
+{$WEAKLINKRTTI OFF}
 // ************************************************************************ //
 // WARNING                                                                    
 // -------                                                                    
@@ -37,7 +37,9 @@ unit NetFwTypeLib_TLB;
 
 interface
 
-uses Winapi.Windows, System.Classes, System.Variants, System.Win.StdVCL, Vcl.Graphics, Winapi.ActiveX;
+uses Winapi.Windows, System.Classes, System.Variants, // System.Win.StdVCL,
+  //Vcl.Graphics,
+  Winapi.ActiveX;
   
 
 // *********************************************************************//

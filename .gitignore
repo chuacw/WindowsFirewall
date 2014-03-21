@@ -22,6 +22,8 @@ local.properties
 
 __history/
 *.local
+*.dcu
+*.identcache
 
 # External tool builders
 .externalToolBuilders/
