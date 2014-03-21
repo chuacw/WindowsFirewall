@@ -23,7 +23,6 @@ type
       FRule: INetFwRule;
       constructor CreateEmptyRule;
     public type
-      TWindowsFirewallToStringHelper<T> = record helper for T end;
       TWindowsFirewallRuleAction = (Block, Allow);
       TWindowsFirewallRuleActionHelper = record helper for TWindowsFirewallRuleAction
         function ToString: string;
